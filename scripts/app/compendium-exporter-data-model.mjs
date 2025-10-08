@@ -1,5 +1,24 @@
 import { CustomMappingDataModel } from './custom-mapping-data-model.mjs';
 
+/**
+ * @typedef {Object} DocumentMapping
+ * @property {string} id
+ * @property {string} key
+ * @property {string} value
+ *
+ * @typedef {Object} CustomMapping
+ * @property {DocumentMapping} actor
+ * @property {DocumentMapping} item
+ *
+ * @typedef {Object} ExporterOptions
+ * @property {string} packId
+ * @property {boolean} sortEntries
+ * @property {boolean} useIdAsKey
+ * @property {boolean} excludeEmptyString
+ * @property {boolean} generateModule
+ * @property {string} translationLocale
+ * @property {CustomMapping} customMapping
+ */
 export class CompendiumExporterDataModel extends foundry.abstract.DataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
@@ -11,6 +30,9 @@ export class CompendiumExporterDataModel extends foundry.abstract.DataModel {
       }),
       useIdAsKey: new fields.BooleanField({
         label: 'BTFG.CompendiumExporter.UseIdAsKey',
+      }),
+      excludeEmptyString: new fields.BooleanField({
+        label: 'BTFG.CompendiumExporter.ExcludeEmptyString',
       }),
       generateModule: new fields.BooleanField({
         label: 'BTFG.CompendiumExporter.GenerateModule',

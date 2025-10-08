@@ -1,11 +1,15 @@
 import { AbstractExporter } from './abstract-exporter.mjs';
 
 export class JournalEntryExporter extends AbstractExporter {
-  static getDocumentData(indexDocument, document) {
+  /**
+   * @param {Object} indexDocument
+   * @param {JournalEntryData} document
+   */
+  async getDocumentData(indexDocument, document) {
     const { name } = indexDocument;
     const documentData = { name };
 
-    if (AbstractExporter._hasContent(document.pages)) {
+    if (this._notEmpty(document.pages)) {
       documentData.pages = {};
 
       for (const {
@@ -42,22 +46,5 @@ export class JournalEntryExporter extends AbstractExporter {
     }
 
     return documentData;
-  }
-
-  async _processDataset() {
-    const documents = await this.pack.getIndex();
-
-    for (const indexDocument of documents) {
-      const key = this._getExportKey(indexDocument);
-      this.dataset.entries[key] = foundry.utils.mergeObject(
-        JournalEntryExporter.getDocumentData(
-          indexDocument,
-          await this.pack.getDocument(indexDocument._id),
-        ),
-        this.existingContent[key] ?? {},
-      );
-
-      this._stepProgressBar();
-    }
   }
 }

@@ -1,31 +1,20 @@
 import { AbstractExporter } from './abstract-exporter.mjs';
 
 export class ItemExporter extends AbstractExporter {
-  static getDocumentData(indexDocument, customMapping) {
+  /**
+   * @param {Object} indexDocument
+   * @param {ItemData} document
+   */
+  async getDocumentData(indexDocument, document) {
     const { name } = indexDocument;
     const documentData = { name };
 
-    AbstractExporter._addCustomMapping(customMapping, indexDocument, documentData);
+    this._addCustomMapping(this.options.customMapping.item, indexDocument, documentData);
 
     return documentData;
   }
 
-  async _processDataset() {
-    const documents = await this.pack.getIndex({
-      fields: [...Object.values(this.options.customMapping.item).map((mapping) => mapping.value)],
-    });
-
-    for (const indexDocument of documents) {
-      const key = this._getExportKey(indexDocument);
-      this.dataset.entries[key] = foundry.utils.mergeObject(
-        ItemExporter.getDocumentData(
-          indexDocument,
-          this.options.customMapping.item,
-        ),
-        this.existingContent[key] ?? {},
-      );
-
-      this._stepProgressBar();
-    }
+  _getIndexFields() {
+    return [...Object.values(this.options.customMapping.item).map((mapping) => mapping.value)];
   }
 }

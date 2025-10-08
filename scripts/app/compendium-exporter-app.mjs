@@ -1,5 +1,5 @@
 import * as BTFG from '../const.mjs';
-import { ExporterInstanciator } from '../exporters/exporter-instanciator.mjs';
+import { ExporterInstantiator } from '../exporters/exporter-instantiator.mjs';
 import { CompendiumExporterDataModel } from './compendium-exporter-data-model.mjs';
 
 const { api, ux } = foundry.applications;
@@ -179,7 +179,7 @@ export class CompendiumExporterApp extends api.HandlebarsApplicationMixin(api.Ap
   static async #onExport() {
     const pack = this.#getPack();
     if (null !== pack) {
-      const exporter = ExporterInstanciator.createForPack(pack, this.#object, this.#selectedFile);
+      const exporter = ExporterInstantiator.createForPack(pack, this.#object, this.#selectedFile);
 
       await exporter.export();
     }

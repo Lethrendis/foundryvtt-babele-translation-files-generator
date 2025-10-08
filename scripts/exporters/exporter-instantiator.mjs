@@ -1,6 +1,7 @@
 import * as exporters from './_index.mjs';
 
-const EXPORTERS = {
+/** @type {Record<string, typeof AbstractExporter>} */
+export const EXPORTERS = {
   Actor: exporters.ActorExporter,
   Adventure: exporters.AdventureExporter,
   Cards: exporters.CardsExporter,
@@ -12,11 +13,11 @@ const EXPORTERS = {
   Scene: exporters.SceneExporter,
 };
 
-export class ExporterInstanciator {
+export class ExporterInstantiator {
   /**
    * @param {CompendiumCollection} pack
-   * @param {*} options
-   * @param {File} existingFile
+   * @param {ExporterOptions} options
+   * @param {File|null} existingFile
    * @returns {AbstractExporter}
    */
   static createForPack(pack, options, existingFile) {
@@ -25,7 +26,7 @@ export class ExporterInstanciator {
     } catch (err) {
       console.error(`[BTFG] Exporter creation error: ${err.toString()}`);
 
-      ui.notifications.error(game.i18n.format('BTFG.ExporterInstanciator.InvalidCompendium', {
+      ui.notifications.error(game.i18n.format('BTFG.ExporterInstantiator.InvalidCompendium', {
         label: pack.metadata.label,
       }));
     }

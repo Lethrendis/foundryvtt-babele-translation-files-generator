@@ -4,7 +4,11 @@ import FileSaver from '../vendors/filesaver/FileSaver.min.js';
 const MODULE_TPL_BASE_URI = './modules/babele-translation-files-generator/_module_tpl';
 const MODULE_TPL_ID = 'your-module-id';
 
+/**
+ * @typedef {import('../app/compendium-exporter-data-model.mjs').ExporterOptions} ExporterOptions
+ */
 export class AbstractExporter {
+  /** @type {ExporterOptions} */
   options;
   dataset = {
     label: '',
@@ -12,9 +16,7 @@ export class AbstractExporter {
     folders: {},
     entries: {},
   };
-  /**
-   * @typedef {CompendiumCollection}
-   */
+  /** @type {CompendiumCollection} */
   pack;
 
   _progress;
@@ -22,6 +24,11 @@ export class AbstractExporter {
   progressMessage;
   progressTotalElements;
 
+  /**
+   * @param {CompendiumCollection} pack
+   * @param {ExporterOptions} options
+   * @param existingFile
+   */
   constructor(pack, options, existingFile) {
     if (this.constructor === AbstractExporter) {
       throw new TypeError('Abstract class "AbstractExporter" cannot be instantiated directly');
@@ -60,6 +67,16 @@ export class AbstractExporter {
     } else {
       this._downloadFile();
     }
+  }
+
+  /**
+   * @abstract
+   * @param {Object} indexDocument
+   * @param {Object} document
+   * @returns {Promise<Object>}
+   */
+  async getDocumentData(indexDocument, document) {
+    throw new Error('You must implement this function');
   }
 
   async _processExistingEntries() {
@@ -115,8 +132,32 @@ export class AbstractExporter {
     }
   }
 
+  _getIndexFields() {
+    return [];
+  }
+
+  async _processDocumentData(indexDocument, documentData) {
+  }
+
   async _processDataset() {
-    throw new Error('You must implement this function');
+    const documents = await this.pack.getIndex({ fields: this._getIndexFields() });
+
+    for (const indexDocument of documents) {
+      const key = this._getExportKey(indexDocument);
+      const documentData = await this.getDocumentData(
+        indexDocument,
+        await this.pack.getDocument(indexDocument._id),
+      );
+
+      await this._processDocumentData(indexDocument, documentData);
+
+      this.dataset.entries[key] = foundry.utils.mergeObject(
+        documentData,
+        this.existingContent[key] ?? {},
+      );
+
+      this._stepProgressBar();
+    }
   }
 
   async _processFolders() {
@@ -126,18 +167,18 @@ export class AbstractExporter {
     });
   }
 
-  static _addCustomMapping(customMapping, indexDocument, documentData) {
+  _addCustomMapping(customMapping, indexDocument, documentData) {
     const flattenDocument = foundry.utils.flattenObject(indexDocument);
 
     Object.values(customMapping).forEach(({ key, value }) => {
-      if (flattenDocument.hasOwnProperty(value)) {
+      if (flattenDocument.hasOwnProperty(value) && (!this.options.excludeEmptyString || '' !== flattenDocument[value])) {
         documentData[key] = flattenDocument[value];
       }
     });
   }
 
-  static _hasContent(dataset) {
-    return Array.isArray(dataset) ? dataset.length : dataset.size;
+  _notEmpty(dataset) {
+    return 0 < (Array.isArray(dataset) ? dataset.length : dataset.size);
   }
 
   _getStringifiedDataset() {

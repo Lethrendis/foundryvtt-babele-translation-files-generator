@@ -1,55 +1,54 @@
 import { AbstractExporter } from './abstract-exporter.mjs';
 
 export class ActorExporter extends AbstractExporter {
-  static getDocumentData(indexDocument, document, customMapping) {
+  /**
+   * @param {Object} indexDocument
+   * @param {ActorData} document
+   */
+  async getDocumentData(indexDocument, document) {
     const { name, prototypeToken: { name: tokenName } = {} } = indexDocument;
     const documentData = { name, tokenName: tokenName ?? name };
+    const { actor: actorMapping, item: itemMapping } = this.options.customMapping;
 
-    if (AbstractExporter._hasContent(document.items)) {
+    if (this._notEmpty(document.items)) {
       documentData.items = {};
 
-      for (const { name } of document.items) {
-        documentData.items[name] = { name };
+      for (const item of document.items) {
+        const { name } = item;
+        const itemData = { name };
+
+        if (itemMapping) {
+          this._addCustomMapping(itemMapping, item, itemData);
+        }
+
+        documentData.items[this._getExportKey(item)] = itemData;
       }
     }
 
-    AbstractExporter._addCustomMapping(customMapping, indexDocument, documentData);
+    if (actorMapping) {
+      this._addCustomMapping(actorMapping, indexDocument, documentData);
+    }
 
     return documentData;
   }
 
-  async _processDataset() {
-    const documents = await this.pack.getIndex({
-      fields: [
-        'prototypeToken.name',
-        ...Object.values(this.options.customMapping.actor).map((mapping) => mapping.value),
-      ],
-    });
+  _getIndexFields() {
+    return [
+      'prototypeToken.name',
+      ...Object.values(this.options.customMapping.actor).map((mapping) => mapping.value),
+    ];
+  }
 
-    for (const indexDocument of documents) {
-      let documentData = ActorExporter.getDocumentData(
-        indexDocument,
-        await this.pack.getDocument(indexDocument._id),
-        this.options.customMapping.actor,
-      );
+  async _processDocumentData(indexDocument, documentData) {
+    /** @type {Actor} */
+    const document = await this.pack.getDocument(indexDocument._id);
 
-      const key = this._getExportKey(indexDocument);
+    if (document.items.size) {
+      documentData.items = {};
 
-      this.dataset.entries[key] = documentData;
-
-      const document = await this.pack.getDocument(indexDocument._id);
-
-      if (document.items.size) {
-        documentData.items = {};
-
-        for (const { name } of document.items) {
-          documentData.items[name] = { name };
-        }
+      for (const item of document.items) {
+        documentData.items[this._getExportKey(item)] = { name: item.name };
       }
-
-      documentData = foundry.utils.mergeObject(documentData, this.existingContent[key] ?? {});
-
-      this._stepProgressBar();
     }
   }
 }

@@ -1,11 +1,15 @@
 import { AbstractExporter } from './abstract-exporter.mjs';
 
 export class SceneExporter extends AbstractExporter {
-  static getDocumentData(indexDocument, document) {
+  /**
+   * @param {Object} indexDocument
+   * @param {SceneData} document
+   */
+  async getDocumentData(indexDocument, document) {
     const { name } = indexDocument;
     const documentData = { name };
 
-    if (AbstractExporter._hasContent(document.drawings)) {
+    if (this._notEmpty(document.drawings)) {
       documentData.drawings = {};
 
       for (const { text } of document.drawings) {
@@ -15,7 +19,7 @@ export class SceneExporter extends AbstractExporter {
       }
     }
 
-    if (AbstractExporter._hasContent(document.notes)) {
+    if (this._notEmpty(document.notes)) {
       documentData.notes = {};
 
       for (const { text } of document.notes) {
@@ -26,22 +30,5 @@ export class SceneExporter extends AbstractExporter {
     }
 
     return documentData;
-  }
-
-  async _processDataset() {
-    const documents = await this.pack.getIndex();
-
-    for (const indexDocument of documents) {
-      const key = this._getExportKey(indexDocument);
-      this.dataset.entries[key] = foundry.utils.mergeObject(
-        SceneExporter.getDocumentData(
-          indexDocument,
-          await this.pack.getDocument(indexDocument._id),
-        ),
-        this.existingContent[key] ?? {},
-      );
-
-      this._stepProgressBar();
-    }
   }
 }
