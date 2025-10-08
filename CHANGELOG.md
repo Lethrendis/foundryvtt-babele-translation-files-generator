@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+[13.1.0] - 2025-10-08
+
+### Added
+
+- New option to ignore empty translations.
+- Process items mapping in adventures exporter.
+
+### Removed
+
+- Remove the `autoRegisterBabel` option in generated module.
+
 [13.0.0] - 2025-06-07
 
 ### Added
@@ -103,7 +114,9 @@
 
 - Initial version of the module.
 
-[Unreleased]: https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator/compare/13.0.0...main
+[Unreleased]: https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator/compare/13.1.0...main
+
+[13.1.0]: https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator/compare/13.0.0...13.1.0
 
 [13.0.0]: https://github.com/DjLeChuck/foundryvtt-babele-translation-files-generator/compare/12.2.2...13.0.0
 
