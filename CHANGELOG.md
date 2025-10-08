@@ -6,12 +6,12 @@
 
 ### Added
 
-- New option to ignore empty translations.
-- Process items mapping in adventures exporter.
+- New option to ignore empty translations
+- Process items mapping on actor's items within Adventures' exporter
 
 ### Removed
 
-- Remove the `autoRegisterBabel` option in generated module.
+- Remove the `autoRegisterBabel` option in generated module (the module is always registered)
 
 [13.0.0] - 2025-06-07
 
