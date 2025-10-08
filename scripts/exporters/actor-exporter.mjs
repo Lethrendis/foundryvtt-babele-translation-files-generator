@@ -38,17 +38,4 @@ export class ActorExporter extends AbstractExporter {
       ...Object.values(this.options.customMapping.actor).map((mapping) => mapping.value),
     ];
   }
-
-  async _processDocumentData(indexDocument, documentData) {
-    /** @type {Actor} */
-    const document = await this.pack.getDocument(indexDocument._id);
-
-    if (document.items.size) {
-      documentData.items = {};
-
-      for (const item of document.items) {
-        documentData.items[this._getExportKey(item)] = { name: item.name };
-      }
-    }
-  }
 }

@@ -171,8 +171,12 @@ export class AbstractExporter {
     const flattenDocument = foundry.utils.flattenObject(indexDocument);
 
     Object.values(customMapping).forEach(({ key, value }) => {
-      if (flattenDocument.hasOwnProperty(value) && (!this.options.excludeEmptyString || '' !== flattenDocument[value])) {
-        documentData[key] = flattenDocument[value];
+      if (foundry.utils.hasProperty(flattenDocument, value)) {
+        const documentValue = foundry.utils.getProperty(flattenDocument, value);
+
+        if (!this.options.excludeEmptyString || '' !== documentValue) {
+          documentData[key] = foundry.utils.getProperty(flattenDocument, value);
+        }
       }
     });
   }
